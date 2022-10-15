@@ -865,7 +865,7 @@ class WadRun {
       }
       Side other = right?l.left:l.right;
       if(other!=null && other.s==sec && !prunelines) {
-        errsec = sec; wp.error("both sides assigned to the same sector");
+	  //        errsec = sec; wp.error("both sides assigned to the same sector");
       }
       Side ns = new Side(l,sides);
       if(right) { l.right = ns; } else { l.left = ns; }
@@ -890,7 +890,7 @@ class WadRun {
           if(i<0) i = v.v.size()-1;
           if(i>=v.v.size()) i = 0;
           m = v.v.elementAt(i);
-          if(m==l) { errsec = sec; wp.error("trying to make sector on unconnected line"); };
+	  //          if(m==l) { errsec = sec; wp.error("trying to make sector on unconnected line"); };
           l = m;
           v = l.from==v?l.to:l.from;
           continue main;
