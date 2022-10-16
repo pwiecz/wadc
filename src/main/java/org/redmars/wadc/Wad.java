@@ -182,6 +182,7 @@ public class Wad {
   }
 
     private void packSides() {
+	// TODO: compute xoff of all the lines here
         HashMap<PackedSide, Integer> packedSides = new LinkedHashMap<>();
 	for (Side a : wr.sides) {
 	    int xoff = a.l.xoff;
