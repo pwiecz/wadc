@@ -51,6 +51,7 @@ public class Wad {
       f.writeBytes("PWAD");
       writeInt(numentries);
       writeInt(12); // dir offset
+      packSides();
       int tsize = writeThings();
       int lsize = writeLines();
       int dsize = writeSides();
@@ -180,19 +181,43 @@ public class Wad {
     return numlines*(wr.hexen ? 16 : 14);
   }
 
+    private void packSides() {
+        HashMap<PackedSide, Integer> packedSides = new LinkedHashMap<>();
+	for (Side a : wr.sides) {
+	    int xoff = a.l.xoff;
+	    int yoff = a.l.yoff;
+	    int w = a.l.width();
+	    Side os = a.l.left == a ? a.l.right : a.l.left;
+	    if (os == null) os = a;
+	    String t = lookup("U", a.l.t, a.s.ceil - os.s.ceil, w, a.s.floor + 1000);
+	    String b = lookup("L", a.l.b, os.s.floor - a.s.floor, w, a.s.floor + 1000);
+	    String m = lookup("N", a.l.m, a.s.ceil - a.s.floor, w, a.s.floor + 1000);
+	    Sector s = a.s;
+	    PackedSide packedSide = new PackedSide(xoff, yoff, t, b, m, s);
+	    Integer index = packedSides.get(packedSide);
+	    if (index == null) {
+		index = packedSides.size();
+		packedSides.put(packedSide, index);
+	    }
+	    a.idx = index;
+	}
+        wr.packedSides = new ArrayList<PackedSide>();
+	for (PackedSide side : packedSides.keySet()) {
+	    wr.packedSides.add(side);
+	}
+	mf.msg("unpacked sides: " + wr.sides.size() + " packed sides: " + wr.packedSides.size());
+    }
+
   private int writeSides() throws IOException {
-    List<Side> v = wr.sides;
+    List<PackedSide> v = wr.packedSides;
     int numsides = 0;
-    for (Side a : v) {
+    for (PackedSide a : v) {
       numsides++;
-      writeShort(a.l.xoff);
-      writeShort(a.l.yoff);
-      int w = a.l.width();
-      Side os = a.l.left == a ? a.l.right : a.l.left;
-      if (os == null) os = a;
-      string(lookup("U", a.l.t, a.s.ceil - os.s.ceil, w, a.s.floor + 1000));
-      string(lookup("L", a.l.b, os.s.floor - a.s.floor, w, a.s.floor + 1000));
-      string(lookup("N", a.l.m, a.s.ceil - a.s.floor, w, a.s.floor + 1000));
+      writeShort(a.xoff);
+      writeShort(a.yoff);
+      string(a.t);
+      string(a.b);
+      string(a.m);
       writeShort(a.s.idx);
     }
 
